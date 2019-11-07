@@ -6,9 +6,6 @@ metadata:
   labels:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-  annotations:
-    helm.sh/hook: pre-install
-    helm.sh/hook-delete-policy: hook-succeeded
 spec:
   template:
     metadata:
@@ -20,6 +17,6 @@ spec:
       containers:
         - name: ns-labeler
           image: "{{ .Values.global.hub }}/kubectl:{{ .Values.global.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           command: ["kubectl", "label", "ns", {{ .Release.Namespace }}, "ca.istio.io/override=true"]
       restartPolicy: OnFailure
