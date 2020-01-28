@@ -40,6 +40,24 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
+      initContainers:
+      - name: wait-for-prometheus
+        image: pstauffer/curl:v1.0.3
+        args:
+        - /bin/sh
+        - -c
+        - >
+          set -x;
+          for i in 1 2 3;
+          do
+            {{- if .Values.prometheus.install }}
+            curl --fail --max-time 10 http://{{ template "flagger.fullname" . }}-prometheus:9090 && exit 0
+            {{- else }}
+            curl --fail --max-time 10 {{ .Values.metricsServer }} && exit 0
+            {{- end }}
+            sleep 5;
+          done
+          exit 1
       containers:
         - name: flagger
           securityContext:
